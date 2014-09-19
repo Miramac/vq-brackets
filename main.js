@@ -22,10 +22,11 @@ define(function (require, exports, module) {
     function handleSelectiont() {
         var editor = EditorManager.getFocusedEditor();
         if (editor) {
-            //var insertionPos = editor.getCursorPos();
+            // TODO: [x]Get selected text
             var selectedText = editor.getSelectedText();
             if(selectedText !== '') {
-                window.alert(selectedText);
+                // TODO: Execute command
+                console.log(selectedText);
             }
         }
     }
@@ -39,5 +40,6 @@ define(function (require, exports, module) {
     // The label of the menu item is the name we gave the command (see above)
     var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
     menu.addMenuDivider();
-    menu.addMenuItem(VQ_GET_SELECTION,'Ctrl-R');
+    // NOTE: Execute hotkey
+    menu.addMenuItem(VQ_GET_SELECTION,'Alt-Q');
 });
