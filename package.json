@@ -1,0 +1,12 @@
+{
+    "name": "miramac.vq-brackets",
+    "title": "vocQuery Brackets",
+    "description": "",
+    "homepage": "",
+    "version": "0.0.0",
+    "author": "miramc",
+    "license": "MIT",
+    "engines": {
+        "brackets": ">=0.24.0"
+    }
+}
