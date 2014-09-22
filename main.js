@@ -13,10 +13,11 @@ define(function (require, exports, module) {
         , NodeConnection = brackets.getModule("utils/NodeConnection")
         , AppInit = brackets.getModule("utils/AppInit")
         , ExtensionUtils = brackets.getModule("utils/ExtensionUtils")
+        , Dialogs = brackets.getModule("widgets/Dialogs")
         ;
     
     var nodeConnection
-        , vqReady = false;
+        , vqReady = false
         ;
     
         //var ProjectManager = brackets.getModule('project/ProjectManager');
@@ -43,10 +44,14 @@ define(function (require, exports, module) {
         nodeConnection = new NodeConnection();
         // Helper function that tries to connect to node
         function connect() {
-            var connectionPromise = nodeConnection.connect(true);
-            
-            connectionPromise.fail(function () {
-                console.error("[vq-brackets] failed to connect to node");
+            var connectionPromise = nodeConnection.connect(true)
+            .then(function () {
+                console.log("[vq-brackets] Connected to vocQuery");
+				vqReady = true;
+            })
+            .fail(function () {
+                console.error("[vq-brackets] failed to connect to vocQuery");
+				vqReady = false;
             });
             
             return connectionPromise;
@@ -64,10 +69,13 @@ define(function (require, exports, module) {
             return loadPromise;
         }
         
-        $(nodeConnection).on("vq.update", function (evt, data) {
-            console.log("[vq-brackets] " + data);
-        });
-        vqReady = true;
+        $(nodeConnection)
+			.on("vq.update", function (evt, data) {
+				console.log("[vq-brackets] " + data);
+			})
+			.on("vq.error", function (evt, data) {
+				console.error("[vq-brackets] " + data);
+			});
         chain(connect, loadVqDomain);
     });
     
@@ -78,16 +86,33 @@ define(function (require, exports, module) {
         if (editor) {
             // TODO: [x]Get selected text
             var selectedText = editor.getSelectedText();
-            if(selectedText !== '' && vqReady) {
-                // TODO: Execute command
-                nodeConnection.domains.vq.execVq(null, selectedText)
-                .fail(function (err) {
-                    console.error("[vq-brackets] failed to run vocQuery");
-                    console.error(err);
-                })
-                .done(function (result) {
-                    console.log("[vq-brackets] " + result);
+            if (selectedText !== '' && vqReady) {
+                Dialogs.showModalDialog("vq-brackets-cmd", "vocQuery", selectedText,  [{
+					className: Dialogs.DIALOG_BTN_CLASS_PRIMARY,
+					id: Dialogs.DIALOG_BTN_OK,
+					text: "Run"
+				}, {
+					className: Dialogs.DIALOG_BTN_CLASS_NORMAL,
+					id: Dialogs.DIALOG_BTN_CANCEL,
+					text: "Cancel"
+				}
+				] 
+                ).done(function (id) {
+                    // If canceld
+                    if (id !== "ok") return;
+					// TODO: Execute command
+					nodeConnection.domains.vq.execVq(null, selectedText)
+					.fail(function (err) {
+						console.error("[vq-brackets] failed to run vocQuery");
+						console.error(err);
+					})
+					.done(function (result) {
+						console.log("[vq-brackets] " + result);
+					});
+ 
                 });
+                
+                
                 
             }
         }
@@ -103,5 +128,5 @@ define(function (require, exports, module) {
     var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
     menu.addMenuDivider();
     // NOTE: Execute hotkey
-    menu.addMenuItem(VQ_GET_SELECTION,'Alt-Q');
+    menu.addMenuItem(VQ_GET_SELECTION, 'Alt-Q');
 });
