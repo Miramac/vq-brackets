@@ -1,5 +1,5 @@
 /*jshint laxcomma: true, browser: true, jquery: true, node: true*/
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, node: true */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, maxerr: 50, node: true */
 /*global brackets */
 
 (function () {
@@ -7,59 +7,44 @@
     "use strict";
     
     var _domainManager = null
-		, fs = require('fs')
-	//	, vqExc = require('./vq.exec')
-    ;
+		, fs = require('fs') 
+        ;
     /**
      * 
      */
     function cmdVq(path, command, callback) {
-        var exec    = require('child_process').exec
-            , cmd     = "node "
-            , child
-            , pId = (Math.random() * 1000000)
-            , tmpFile = __dirname + "\\tmp\\vq.command." + pId + ".tmp"
-            ;
-
+        var spawn = require('child_process').spawn
+        , child
+        , pId = (Math.random() * 1000000)
+        , tmpFile = __dirname + '/./tmp/vq.command.' + pId + '.tmp'
+        ;
         if (command) {
-            fs.writeFileSync(tmpFile, command);
-            cmd += __dirname + "\\lib\\vq.exec.js -v " + tmpFile;
-			child = exec(cmd, function (error, stdout, stderr) {
-				fs.unlink(tmpFile, function() {
-					callback(error, "Done");
-				});
-				
-			});
-			
-			child.stdout.on("data", function (data) {
-				_domainManager.emitEvent("vq", "update", data);
-			});
-			child.stderr.on("data", function (data) {
-				_domainManager.emitEvent("vq", "error", data);
-			});
-			
+        
+            fs.writeFile(tmpFile, command, function(err){
+                if(err) throw err;
+                child    = spawn("node" ,[__dirname + '/./lib/vq.exec', tmpFile]);
+                
+                //on stdout
+                child.stdout.on("data", function (data) {
+                    _domainManager.emitEvent("vq", "update", data.toString());
+                });
+                //on stderr
+                child.stderr.on("data", function (data) {
+                    _domainManager.emitEvent("vq", "error", data.toString());
+                });
+                //on Exit
+                child.on('exit', function (code) {
+                    fs.unlink(tmpFile, function(err) {
+                        callback(err, "Exit with code: " + code);
+                    });
+                });
+            });
         }
-        
-        if (path) {
-          //process.chdir(path);
-        }
-        
-        /*
-        child = exec(cmd, function (error, stdout, stderr) {
-          // fs.unlinkSync(tmpFile, callback)
-
-          callback(error, "Done!");
-        });
-        
-        child.stdout.on("data", function (data) {
-          _domainManager.emitEvent("vq", "update", data);
-        });
-		*/
     }
-    
+        
     /**
      *
-     */
+    */
     function init(domainManager) {
         _domainManager = domainManager;
         
@@ -84,13 +69,13 @@
             "update",
             [{name: "data", type: "string"}]
         );
-		_domainManager.registerEvent(
-			"vq",
-			"error",
-			[{name: "data", type: "string"}]
+        _domainManager.registerEvent(
+            "vq",
+            "error",
+            [{name: "data", type: "string"}]
         );
     }
-    
+
     exports.init = init;
     
 }());

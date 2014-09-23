@@ -2,33 +2,21 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, node: true */
 /*global brackets */
 var fs = require('fs')
-	,  program = require('commander')
-	// vq = require('vq')
-	// , conf = require('vq-mab/config/conf')
-	// , sql = new vq.Sql(conf.db)
-	// , MAB = require('vq-mab/lib/mab')
-	;
+	 , vq = require('vq')
+	 , conf = require('vq-mab/config/conf')
+	 , sql = new vq.Sql(conf.db)
+	 , MAB = require('vq-mab/lib/mab')
+	, _tmpFile;
+
 	
-program
-	.version('0.0.1')
-	.option('-v, --vocqy <Path>', 'Execute a vocQuery command', exists)  
-	
-	.parse(process.argv)
-	;
-	
-if (program.vocqy){
+if (_tmpFile = exists(process.argv[2])){
 	try {
-		var code = fs.readFileSync(program.vocqy).toString();
+		var _tmpCode = fs.readFileSync(_tmpFile).toString();
 		//log(code);
-		eval(code);
+		eval(_tmpCode);
 	} catch (e) {
-		console.error(e.message);
+		console.error(e);
 	}
-	
-/*	fs.readFile(program.vocqy, function(err, data) {
-		if(err) throw err;
-		console.log(data.toString());
-	} */
 }
 
 

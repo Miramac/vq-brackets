@@ -62,8 +62,9 @@ define(function (require, exports, module) {
             var path        = ExtensionUtils.getModulePath(module, "node/vqDomain"),
                 loadPromise = nodeConnection.loadDomains([path], true);
             
-            loadPromise.fail(function () {
-                console.log("[vq-brackets] failed to load vq domain");
+            loadPromise.fail(function (err) {
+                console.error("[vq-brackets] failed to load vq domain");
+                console.error(err);
             });
             
             return loadPromise;
