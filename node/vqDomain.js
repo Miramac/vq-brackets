@@ -8,25 +8,26 @@
     
     var _domainManager = null
 		, fs = require('fs') 
+        , path = require('path')
         ;
     /**
      * 
      */
-    function cmdVq(path, command, callback) {
+    function execVq(cwd, command, callback) {
         var spawn = require('child_process').spawn
         , child
         , pId = (Math.random() * 1000000)
-        , tmpFile = __dirname + '/./tmp/vq.command.' + pId + '.tmp'
+        , tmpFile = path.join(__dirname, 'tmp/vq.command.' + pId + '.tmp')
         ;
         if (command) {
         
             fs.writeFile(tmpFile, command, function(err){
                 if(err) throw err;
-                child    = spawn("node" ,[__dirname + '/./lib/vq.exec', tmpFile]);
+                child    = spawn("node" ,[path.join(__dirname , 'lib/vq.exec'), tmpFile]);
                 
                 //on stdout
                 child.stdout.on("data", function (data) {
-                    _domainManager.emitEvent("vq", "update", data.toString());
+                    _domainManager.emitEvent("vq", "console", data.toString());
                 });
                 //on stderr
                 child.stderr.on("data", function (data) {
@@ -37,6 +38,41 @@
                     fs.unlink(tmpFile, function(err) {
                         callback(err, "Exit with code: " + code);
                     });
+                });
+            });
+        }
+    }
+    function execSql(cwd, command, callback) {
+        var spawn = require('child_process').spawn
+        , child
+        , pId = (Math.random() * 1000000)
+        , tmpFile = path.join(__dirname, 'tmp/vq.command.' + pId + '.tmp')
+        ;
+        if (command) {
+        
+            fs.writeFile(tmpFile, command, function(err){
+                if(err) throw err;
+                child    = spawn("node" ,[path.join(__dirname , 'lib/vq.exec.sql'), tmpFile]);
+                
+                //on stdout
+                child.stdout.on("data", function (data) {
+                    _domainManager.emitEvent("vq", "console", data.toString());
+                });
+                //on stderr
+                child.stderr.on("data", function (data) {
+                    _domainManager.emitEvent("vq", "error", data.toString());
+                });
+                //on Exit
+                child.on('exit', function (code) {
+                    fs.readFile(tmpFile, function(err, data) {
+                        //do something 
+                        var jsonData = JSON.parse(data);
+                        
+                        _domainManager.emitEvent("vq", "panel", data.toString());
+                        fs.unlink(tmpFile, function(err) {
+                            callback(err, "Exit with code: " + code);
+                        });
+                    })
                 });
             });
         }
@@ -55,10 +91,21 @@
         _domainManager.registerCommand(
             "vq",
             "execVq",
-            cmdVq,
+            execVq,
             true,
             "Runs a vocQuery3 command",
-            ["path", "command"],
+            ["cwd", "command"],
+            [{name: "result",
+                type: "string",
+                description: "The result of the execution"}]
+        );
+        _domainManager.registerCommand(
+            "vq",
+            "execSql",
+            execSql,
+            true,
+            "Runs a SQL command",
+            ["cwd", "command"],
             [{name: "result",
                 type: "string",
                 description: "The result of the execution"}]
@@ -66,12 +113,22 @@
         
         _domainManager.registerEvent(
             "vq",
-            "update",
+            "console",
             [{name: "data", type: "string"}]
         );
         _domainManager.registerEvent(
             "vq",
             "error",
+            [{name: "data", type: "string"}]
+        );
+        _domainManager.registerEvent(
+            "vq",
+            "modal",
+            [{name: "data", type: "string"}]
+        );
+        _domainManager.registerEvent(
+            "vq",
+            "panel",
             [{name: "data", type: "string"}]
         );
     }

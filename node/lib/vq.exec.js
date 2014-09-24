@@ -6,6 +6,7 @@ var fs = require('fs')
 	 , conf = require('vq-mab/config/conf')
 	 , sql = new vq.Sql(conf.db)
 	 , MAB = require('vq-mab/lib/mab')
+     , updateSplitResult = require('vq-mab/lib/mab.splitresult')
 	, _tmpFile;
 
 	
