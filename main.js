@@ -106,7 +106,7 @@ define(function (require, exports, module) {
                             console.log('[vocQuery] ' + result);
                         });
                     } else if (id === 'sql') {
-                    // TODO: Execute SQL command
+                        // TODO: Execute SQL command
                         nodeConnection.domains.vq.execSql(null, selectedText)
                         .fail(function (err) {
                             console.error('[vocQuery SQL] failed to run vocQuery SQL');
@@ -153,11 +153,59 @@ define(function (require, exports, module) {
             Dialogs.showModalDialog('vq.brackets-result', 'vocQuery', data);
         })
         .on('vq.panel', function (evt, data) {
-            if(!bottomPanel.isVisible()) {
+            if (!bottomPanel.isVisible()) {
                 bottomPanel.show();
             }
-             $('#vq-bottom-panel').append(data);
+            $('#vq-bottom-panel').append(data);
+        })
+        .on('vq.table', function (evt, data) {
+            if (!bottomPanel.isVisible()) {
+                bottomPanel.show();
+            }
+            $('#vq-bottom-panel').append(jsonToHtmlTable(JSON.parse(data)));
         });
         chain(connect, loadVqDomain);
     });
+    
+    
+    
+    //*** HTML Helper
+    
+    
+    // Builds the HTML Table out of myList.
+    function jsonToHtmlTable(json) {
+        var columns = []
+            , headerTr$ = $('<tr/>')
+            , row$ = $('<tr/>')
+            , html
+            , i
+            , colIndex
+            , cellValue;
+
+        for (i = 0 ; i < json.length ; i++) {
+            var rowHash = json[i];
+            for (var key in rowHash) {
+                if ($.inArray(key, columns) == -1) {
+                    columns.push(key);
+                    headerTr$.append($('<th/>').html(key));
+                }
+            }
+        }
+        html = headerTr$;
+
+
+        for (i = 0 ; i < json.length ; i++) {
+            for (colIndex = 0 ; colIndex < columns.length ; colIndex++) {
+                cellValue = json[i][columns[colIndex]];
+                if (cellValue === null) { 
+                    cellValue = ""; 
+                }
+                row$.append($('<td/>').html(cellValue));
+            }
+            html += row$;
+        }
+        console.log(json.length);
+        return html;
+    }
+    
 });

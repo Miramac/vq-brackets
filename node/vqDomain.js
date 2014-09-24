@@ -66,13 +66,13 @@
                 child.on('exit', function (code) {
                     fs.readFile(tmpFile, function(err, data) {
                         //do something 
-                        var jsonData = JSON.parse(data);
+
                         
-                        _domainManager.emitEvent("vq", "panel", data.toString());
+                        _domainManager.emitEvent("vq", "table", data);
                         fs.unlink(tmpFile, function(err) {
                             callback(err, "Exit with code: " + code);
                         });
-                    })
+                    });
                 });
             });
         }
@@ -129,6 +129,11 @@
         _domainManager.registerEvent(
             "vq",
             "panel",
+            [{name: "data", type: "string"}]
+        );
+        _domainManager.registerEvent(
+            "vq",
+            "table",
             [{name: "data", type: "string"}]
         );
     }
