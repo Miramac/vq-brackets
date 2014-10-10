@@ -1,3 +1,5 @@
+/*globals module, process */
+
 module.exports = function(grunt) {
   grunt.initConfig({
 
@@ -14,12 +16,22 @@ module.exports = function(grunt) {
         pretend: false, // Don't do any IO. Before you run the task with `updateAndDelete` PLEASE MAKE SURE it doesn't remove too much.
         verbose: true, // Display log messages when copying files
        // ignoreInDest: "**/*.js", // Never remove js files from destination
-        updateAndDelete: true 
+        updateAndDelete: true
+      }
+    },
+    watch: {
+      scripts: {
+        files: ['**/*'],
+        tasks: ['sync'],
+        options: {
+          spawn: false,
+        }
       }
     }
   });
 
   grunt.loadNpmTasks('grunt-sync');
-  grunt.registerTask('default', ['sync']);
-  
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.registerTask('default', ['sync', 'watch']);
+
 };

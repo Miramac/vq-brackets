@@ -1,0 +1,29 @@
+#brackets-vq-icon,
+#brackets-vq-panel .title {
+    background: url('images/vq-icon_small.svg') no-repeat left top transparent;
+}
+#brackets-vq-icon.active {
+    background-position: left bottom;
+}
+
+#brackets-vq-panel .title {
+    padding-left: 30px;
+    line-height: 24px;
+    background-position: left bottom;
+}
+#brackets-vq-panel .tools {
+    line-height: 24px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 30px;
+    margin-left: -.5em;
+    text-align: right;
+}
+#brackets-vq-panel .tools a.btn {
+    margin: 3px 0;
+}
+#brackets-vq-panel .tools a.btn:hover {
+    cursor: pointer;
+    background-color: #5f5f5f;
+}

@@ -66,9 +66,7 @@
                 child.on('exit', function (code) {
                     fs.readFile(tmpFile, function(err, data) {
                         //do something 
-
-                        
-                        _domainManager.emitEvent("vq", "table", data);
+                        _domainManager.emitEvent("vq", "panel", data.toString());
                         fs.unlink(tmpFile, function(err) {
                             callback(err, "Exit with code: " + code);
                         });
