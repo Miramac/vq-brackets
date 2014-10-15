@@ -24,7 +24,7 @@ define(function (require, exports, module) {
     ;
 
     // Load stylesheet.
-    ExtensionUtils.loadStyleSheet( module, 'main.css' );
+    ExtensionUtils.loadStyleSheet( module, 'css/main.css' );
 
     //var ProjectManager = brackets.getModule('project/ProjectManager');
     //var FileUtils = brackets.getModule('file/FileUtils');
@@ -46,12 +46,11 @@ define(function (require, exports, module) {
         }
     }
 
-
     // Helper function that tries to connect to node
     function connect() {
         var connectionPromise = nodeConnection.connect(true)
         .then(function () {
-            console.log('[vocQuery] Connected to nodejs!');
+            console.log('[vocQuery] Connected to vocQuery!');
             vqReady = true;
         })
         .fail(function () {
@@ -162,16 +161,16 @@ define(function (require, exports, module) {
             $vqIcon.removeClass('active');
             Resizer.hide($vqPanel);
         })
+        //TODO clear only active tab
         .on('click', '[data-target="clear"]', function() {
-            $('.table-container .table', $vqPanel).html('');
+            $('.tab-content .active .table-container .table', $vqPanel).html('');
         })
         //TODO[x] Fix Uncaught TypeError: Cannot call method 'getSelectedText' of null
         .on('click', '[data-target="query"]', function() {
-            executeVocQuery(EditorManager.getFocusedEditor().getSelectedText());
+            executeVocQuery(EditorManager.getActiveEditor().getSelectedText());
         })
         //TODO[x] Fix Uncaught TypeError: Cannot call method 'getSelectedText' of null
         .on('click', '[data-target="sql"]', function() {
-            console.log(EditorManager.getActiveEditor());
             executeSQL(EditorManager.getActiveEditor().getSelectedText());
         })
         ;
@@ -185,26 +184,32 @@ define(function (require, exports, module) {
 
         nodeConnection = new NodeConnection();
         $(nodeConnection)
-        .on('vq.console', function (evt, data) {
-            console.log('[vocQuery] ' + data);
+        //Tabs
+        .on('vq.log', function (evt, data) {
+            $('#log .table-container .table', $vqPanel).append('<tr><td>' + data + '</td></tr>');
+           $('#vq-panel-tab a#tab-log').tab('show');
         })
         .on('vq.error', function (evt, data) {
-            console.error('[vocQuery] ' + data);
-        })
-        .on('vq.modal', function (evt, data) {
-            Dialogs.showModalDialog('vq.brackets-result', 'vocQuery', data);
-        })
-        .on('vq.panel', function (evt, data) {
             if (!bottomPanel.isVisible()) {
                 $vqIcon.addClass('active');
                 bottomPanel.show();
             }
-           $('.table-container .table', $vqPanel).append('<tr><td>' + data + '</td></tr>');
+            $('#error .table-container .table', $vqPanel).append('<tr><td>' + data + '</td></tr>');
+            $('#vq-panel-tab a#tab-error').tab('show');
         })
-        .on('vq.table', function (evt, data) {
-            //Panel.show(data);
-            console.log('.on(\'vq.table\') was called');
+        .on('vq.sql', function (evt, data) {
+            if (!bottomPanel.isVisible()) {
+                $vqIcon.addClass('active');
+                bottomPanel.show();
+            }
+           $('#sql .table-container .table', $vqPanel).append('<tr><td>' + data + '</td></tr>');;
+             $('#vq-panel-tab a#tab-sql').tab('show');
+        })
+        //Modal
+        .on('vq.modal', function (evt, data) {
+            Dialogs.showModalDialog('vq.brackets-result', 'vocQuery', data);
         });
+        
         chain(connect, loadVqDomain);
     });
 

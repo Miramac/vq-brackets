@@ -27,7 +27,7 @@
                 
                 //on stdout
                 child.stdout.on("data", function (data) {
-                    _domainManager.emitEvent("vq", "console", data.toString());
+                    _domainManager.emitEvent("vq", "log", data.toString());
                 });
                 //on stderr
                 child.stderr.on("data", function (data) {
@@ -47,6 +47,7 @@
         , child
         , pId = (Math.random() * 1000000)
         , tmpFile = path.join(__dirname, 'tmp/vq.command.' + pId + '.tmp')
+        , hasNoErr = true
         ;
         if (command) {
         
@@ -56,17 +57,19 @@
                 
                 //on stdout
                 child.stdout.on("data", function (data) {
-                    _domainManager.emitEvent("vq", "console", data.toString());
+                    _domainManager.emitEvent("vq", "log", data.toString());
                 });
                 //on stderr
                 child.stderr.on("data", function (data) {
                     _domainManager.emitEvent("vq", "error", data.toString());
+                    hasNoErr = false;
                 });
                 //on Exit
                 child.on('exit', function (code) {
                     fs.readFile(tmpFile, function(err, data) {
-                        //do something 
-                        _domainManager.emitEvent("vq", "panel", data.toString());
+                        if(hasNoErr) {
+                            _domainManager.emitEvent("vq", "sql", data.toString());
+                        }
                         fs.unlink(tmpFile, function(err) {
                             callback(err, "Exit with code: " + code);
                         });
@@ -111,7 +114,7 @@
         
         _domainManager.registerEvent(
             "vq",
-            "console",
+            "log",
             [{name: "data", type: "string"}]
         );
         _domainManager.registerEvent(
@@ -126,14 +129,10 @@
         );
         _domainManager.registerEvent(
             "vq",
-            "panel",
+            "sql",
             [{name: "data", type: "string"}]
         );
-        _domainManager.registerEvent(
-            "vq",
-            "table",
-            [{name: "data", type: "string"}]
-        );
+
     }
 
     exports.init = init;

@@ -2,7 +2,7 @@
 
 module.exports = function(grunt) {
   grunt.initConfig({
-
+    pkg: grunt.file.readJSON('package.json'),  
     sync: {
       main: {
         files: [{
@@ -11,7 +11,7 @@ module.exports = function(grunt) {
             '**', /* Include everything */
             '!.git' /* but exclude .git dir */
           ],
-          dest: process.env.APPDATA + '\\Brackets\\extensions\\user\\vq-brackets\\',
+          dest: process.env.APPDATA + '/Brackets/extensions/user/<%= pkg.name %>/',
         }],
         pretend: false, // Don't do any IO. Before you run the task with `updateAndDelete` PLEASE MAKE SURE it doesn't remove too much.
         verbose: true, // Display log messages when copying files

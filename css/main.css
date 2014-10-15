@@ -1,6 +1,6 @@
 #brackets-vq-icon,
 #brackets-vq-panel .title {
-    background: url('images/vq-icon_small.svg') no-repeat left top transparent;
+    background: url('../images/vq-icon_small.svg') no-repeat left top transparent;
 }
 #brackets-vq-icon.active {
     background-position: left bottom;
@@ -26,4 +26,8 @@
 #brackets-vq-panel .tools a.btn:hover {
     cursor: pointer;
     background-color: #5f5f5f;
+}
+
+#brackets-vq-panel #error{
+    color: #f74687;
 }
